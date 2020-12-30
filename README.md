@@ -223,7 +223,7 @@ ReactDOM.render((
         </tr>
         <tr>
           <td>getDocument</td>
-          <td>getDocument(): HTMLElement</td>
+          <td>getDocument(this): HTMLElement</td>
           <td></td>
           <td>function returning document node which will be attached click event to close trigger</td>
         </tr>

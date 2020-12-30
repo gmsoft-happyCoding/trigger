@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import { findDOMNode, createPortal } from 'react-dom';
 import { polyfill } from 'react-lifecycles-compat';
@@ -17,8 +18,13 @@ function returnEmptyString() {
   return '';
 }
 
-function returnDocument() {
-  return window.document;
+function returnDocument(self) {
+  try {
+    const thisElement = ReactDOM.findDOMNode(self);
+    return thisElement ? thisElement.ownerDocument : window.document;
+  } catch (e) {
+    return window.document;
+  }
 }
 
 const ALL_HANDLERS = [
@@ -141,7 +147,7 @@ class Trigger extends React.Component {
       {},
       {
         popupVisible: this.state.popupVisible,
-      },
+      }
     );
   }
 
@@ -164,29 +170,29 @@ class Trigger extends React.Component {
     if (state.popupVisible) {
       let currentDocument;
       if (!this.clickOutsideHandler && (this.isClickToHide() || this.isContextMenuToShow())) {
-        currentDocument = props.getDocument();
+        currentDocument = props.getDocument(this);
         this.clickOutsideHandler = addEventListener(
           currentDocument,
           'mousedown',
-          this.onDocumentClick,
+          this.onDocumentClick
         );
       }
       // always hide on mobile
       if (!this.touchOutsideHandler) {
-        currentDocument = currentDocument || props.getDocument();
+        currentDocument = currentDocument || props.getDocument(this);
         this.touchOutsideHandler = addEventListener(
           currentDocument,
           'touchstart',
-          this.onDocumentClick,
+          this.onDocumentClick
         );
       }
       // close popup when trigger type contains 'onContextMenu' and document is scrolling.
       if (!this.contextMenuOutsideHandler1 && this.isContextMenuToShow()) {
-        currentDocument = currentDocument || props.getDocument();
+        currentDocument = currentDocument || props.getDocument(this);
         this.contextMenuOutsideHandler1 = addEventListener(
           currentDocument,
           'scroll',
-          this.onContextMenuClose,
+          this.onContextMenuClose
         );
       }
       // close popup when trigger type contains 'onContextMenu' and window is blur.
@@ -465,7 +471,7 @@ class Trigger extends React.Component {
     popupContainer.style.width = '100%';
     const mountNode = props.getPopupContainer
       ? props.getPopupContainer(findDOMNode(this))
-      : props.getDocument().body;
+      : props.getDocument(this).body;
     mountNode.appendChild(popupContainer);
     return popupContainer;
   };
